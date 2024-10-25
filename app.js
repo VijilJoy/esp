@@ -1,29 +1,33 @@
 // server.js
 const WebSocket = require("ws");
-const express = require("express");
-const app = express();
-const port = process.env.X_ZOHO_CATALYST_LISTEN_PORT || 3000;
+const port = process.env.port || 3000;
 
-// Set up Express server
-app.get("/", (req, res) => {
-  res.send("hello");
-});
-const server = app.listen(port, () => {
-  console.log(`Server listening on ${port}`);
-});
+// Set up WebSocket server
+const wss = new WebSocket.Server({ port });
 
-// Attach WebSocket server to the same port as Express
-const wss = new WebSocket.Server({ server });
 wss.on("connection", (ws) => {
   console.log("Client connected");
 
+  // Keep-alive ping every 30 seconds
+  const keepAliveInterval = setInterval(() => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.ping(); // Sends a ping to the client to keep the connection active
+    }
+  }, 30000);
+
+  ws.on("pong", () => {
+    console.log("Pong received from client");
+  });
+
   ws.on("message", (message) => {
     console.log(`Received: ${message}`);
-    // Echo the message back to the client
     ws.send(`Server received: ${message}`);
   });
 
   ws.on("close", () => {
+    clearInterval(keepAliveInterval);
     console.log("Client disconnected");
   });
 });
+
+console.log(`WebSocket server listening on port ${port}`);
