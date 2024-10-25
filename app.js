@@ -9,7 +9,7 @@ app.get("/", (req, res) => {
   res.send("hello");
 });
 const server = app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+  console.log(`Server listening on ${port}`);
 });
 
 // Attach WebSocket server to the same port as Express
