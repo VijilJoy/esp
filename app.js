@@ -6,7 +6,7 @@ const port = process.env.port || 3000;
 const wss = new WebSocket.Server({ port });
 
 wss.on("connection", (ws) => {
-  console.log("Client connected");
+  console.log("New Client");
 
   // Keep-alive ping every 30 seconds
   const keepAliveInterval = setInterval(() => {
