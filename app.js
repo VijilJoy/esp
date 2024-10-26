@@ -20,7 +20,7 @@ app.post("/data", (req, res) => {
   const data = req.body; // Get the data from the request body
   res.send(data); // Send back the same data as response
   console.log(data);
-
+  lastData = data;
   // Send the data to all WebSocket clients
   wss.clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
