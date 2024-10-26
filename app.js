@@ -1,20 +1,26 @@
 const express = require("express");
 const WebSocket = require("ws");
-const port = 3000;
-
-// Set up WebSocket server
-const wss = new WebSocket.Server({ port });
-const app = express();
-
-app.use(express.json());
+const http = require("http");
 const cors = require("cors");
+const port = process.env.PORT || 3000; // Use environment variable or default to 3000
+
+const app = express();
+app.use(express.json());
 app.use(cors());
 
-var lastData = {};
+let lastData = {};
+
+// Create an HTTP server
+const server = http.createServer(app);
+
+// Set up WebSocket server using the same HTTP server
+const wss = new WebSocket.Server({ server });
+
 app.post("/data", (req, res) => {
   const data = req.body; // Get the data from the request body
   res.send(data); // Send back the same data as response
   console.log(data);
+
   // Send the data to all WebSocket clients
   wss.clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
@@ -26,6 +32,7 @@ app.post("/data", (req, res) => {
     }
   });
 });
+
 app.get("/data", (req, res) => {
   if (lastData) {
     res.setHeader("Content-Type", "application/json");
@@ -40,10 +47,10 @@ app.get("/data", (req, res) => {
 const handleMsg = (message) => {
   try {
     const val = JSON.parse(message); // Parse incoming message
+    lastData = val; // Store the last received data
     wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify(val));
-        lastData = val;
       }
     });
     console.log(val); // Log the received value
@@ -76,6 +83,7 @@ wss.on("connection", (ws) => {
   });
 });
 
-const HTTPPORT = process.env.PORT || 4000;
-app.listen(HTTPPORT, () => console.log(`Express running on port ${HTTPPORT}`));
-console.log(`WebSocket server listening on port ${port}`);
+// Start the HTTP server and WebSocket server on the same port
+server.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
