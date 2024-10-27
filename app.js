@@ -88,7 +88,7 @@ const wss = new WebSocket.Server({ port: 8080 });
 
 // Handle connection events
 wss.on("connection", (ws) => {
-  console.log("New client connected");
+  console.log("New client connec");
 
   // Broadcast incoming messages to all connected clients
   ws.on("message", (message) => {
@@ -106,4 +106,4 @@ wss.on("connection", (ws) => {
   });
 });
 
-console.log("WebSocket server is running on ws://localhost:8080");
+console.log("WebSocket server is rnning on ws://localhost:8080");
