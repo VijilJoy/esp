@@ -80,26 +80,36 @@
 
 // server.listen(port, () => console.log(`Server running on port ${port}`));
 
-const express = require("express");
-const bodyParser = require("body-parser");
-const cors = require("cors");
+const WebSocket = require("ws");
+const http = require("http");
 
-const app = express();
-app.use(cors());
+// Create an HTTP server
+const server = http.createServer();
+const wss = new WebSocket.Server({ server });
+
+// Set the port from the environment variable or use a default value
 const PORT = process.env.PORT || 3000;
 
-// Middleware to parse JSON requests
-app.use(bodyParser.json());
+wss.on("connection", (ws) => {
+  console.log("New client connected.");
 
-app.post("/send-message", (req, res) => {
-  const { user, message } = req.body;
-  console.log(`Received message from ${user}: ${message}`);
+  ws.on("message", (message) => {
+    console.log(`Received message: ${message}`);
 
-  // Here, add your logic to send the message to the ESP32 if applicable
+    // Broadcast the message to all connected clients
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  });
 
-  res.status(200).send("Message received");
+  ws.on("close", () => {
+    console.log("Client disconnected.");
+  });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+// Start the server
+server.listen(PORT, () => {
+  console.log(`WebSocket server is running on port ${PORT}...`);
 });
