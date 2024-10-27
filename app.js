@@ -2,30 +2,26 @@ const express = require("express");
 const WebSocket = require("ws");
 const http = require("http");
 const cors = require("cors");
-const port = process.env.PORT || 3000; // Use environment variable or default to 3000
+const port = process.env.PORT || 3000;
+
+let lastData = {};
 
 const app = express();
 app.use(express.json());
 app.use(cors());
-
-let lastData = {};
-
-// Create an HTTP server
 const server = http.createServer(app);
-
-// Set up WebSocket server using the same HTTP server
 const wss = new WebSocket.Server({ server });
 
 app.post("/data", (req, res) => {
-  const data = req.body; // Get the data from the request body
-  res.send(data); // Send back the same data as response
+  const data = req.body;
+  res.send(data);
   console.log(data);
   lastData = data;
-  // Send the data to all WebSocket clients
+
   wss.clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
       try {
-        client.send(JSON.stringify(data)); // Send data to WebSocket clients
+        client.send(JSON.stringify(data));
       } catch (e) {
         console.error("Error sending message to client:", e);
       }
@@ -46,16 +42,16 @@ app.get("/data", (req, res) => {
 
 const handleMsg = (message) => {
   try {
-    const val = JSON.parse(message); // Parse incoming message
-    lastData = val; // Store the last received data
+    const val = JSON.parse(message);
+    lastData = val;
     wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify(val));
       }
     });
-    console.log(val); // Log the received value
+    console.log(val);
   } catch (e) {
-    console.error("Error parsing JSON:", e); // Log any JSON parsing errors
+    console.error("Error parsing JSON:", e);
   }
 };
 
@@ -65,7 +61,7 @@ wss.on("connection", (ws) => {
   // Keep-alive ping every 30 seconds
   const keepAliveInterval = setInterval(() => {
     if (ws.readyState === WebSocket.OPEN) {
-      ws.ping(); // Sends a ping to the client to keep the connection active
+      ws.ping();
     }
   }, 30000);
 
@@ -74,7 +70,7 @@ wss.on("connection", (ws) => {
   });
 
   ws.on("message", (message) => {
-    handleMsg(message); // Handle incoming messages
+    handleMsg(message);
   });
 
   ws.on("close", () => {
@@ -83,7 +79,4 @@ wss.on("connection", (ws) => {
   });
 });
 
-// Start the HTTP server and WebSocket server on the same port
-server.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+server.listen(port, () => console.log(`Server running on port ${port}`));
