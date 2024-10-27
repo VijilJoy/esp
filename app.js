@@ -16,7 +16,6 @@ app.post("/data", (req, res) => {
   const data = req.body;
   res.send(data);
   console.log(data);
-  lastData = data;
 
   wss.clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
