@@ -143,5 +143,5 @@ app.get("/events", (req, res) => {
 
 // Start the server
 app.listen(port, () => {
-  console.log(`SSE chat server running on http://localhost:${port}`);
+  console.log(`SSE server running on http://localhost:${port}`);
 });
