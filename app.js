@@ -85,63 +85,21 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 
 const app = express();
-const port = process.env.PORT || 3000;
 app.use(cors());
+const PORT = process.env.PORT || 3000;
+
+// Middleware to parse JSON requests
 app.use(bodyParser.json());
 
-let messages = []; // Store chat messages
-let clients = []; // Store connected clients
-
-// Route to handle new messages (send to all connected clients)
 app.post("/send-message", (req, res) => {
   const { user, message } = req.body;
-  if (user && message) {
-    // Create a new message object
-    const newMessage = { user, message, timestamp: new Date() };
-    messages.push(newMessage);
+  console.log(`Received message from ${user}: ${message}`);
 
-    // Limit message history to 50 for memory management
-    if (messages.length > 50) messages.shift();
+  // Here, add your logic to send the message to the ESP32 if applicable
 
-    // Broadcast to all connected clients
-    clients.forEach((client) =>
-      client.res.write(`data: ${JSON.stringify(newMessage)}\n\n`)
-    );
-
-    res.status(200).json({ success: true });
-  } else {
-    res
-      .status(400)
-      .json({ success: false, error: "User and message are required." });
-  }
+  res.status(200).send("Message received");
 });
 
-// SSE route for clients to receive messages
-app.get("/events", (req, res) => {
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("Connection", "keep-alive");
-  res.flushHeaders(); // Flush headers to establish SSE connection
-
-  // Add client to the list
-  const clientId = Date.now();
-  const newClient = {
-    id: clientId,
-    res,
-  };
-  clients.push(newClient);
-
-  // Send current message history to the new client
-  messages.forEach((msg) => res.write(`data: ${JSON.stringify(msg)}\n\n`));
-
-  // Remove client when connection closes
-  req.on("close", () => {
-    clients = clients.filter((client) => client.id !== clientId);
-    res.end();
-  });
-});
-
-// Start the server
-app.listen(port, () => {
-  console.log(`SSE server running on http://localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
