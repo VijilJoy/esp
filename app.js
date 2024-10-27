@@ -55,7 +55,7 @@ const handleMsg = (message) => {
 };
 
 wss.on("connection", (ws) => {
-  console.log("New Client connected");
+  console.log("New Client");
 
   // Keep-alive ping every 30 seconds
   const keepAliveInterval = setInterval(() => {
