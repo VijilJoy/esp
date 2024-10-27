@@ -2,7 +2,7 @@ const express = require("express");
 const WebSocket = require("ws");
 const http = require("http");
 const cors = require("cors");
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 3000;
 
 let lastData = {};
 
