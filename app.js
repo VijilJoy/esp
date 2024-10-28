@@ -26,6 +26,14 @@ app.post("/data", (req, res) => {
       }
     }
   });
+  res.status(200);
+});
+app.post("/mobileData", (req, res) => {
+  const data = req.body;
+  res.send(data);
+  console.log(data);
+  lastData = data;
+  res.status(200);
 });
 
 app.get("/data", (req, res) => {
